@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Business Review</title>
+    <link rel="stylesheet" href="styles.css?v=2.1">
+    <script src="chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+                <span class="icon" id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
+            <h1>📊 Monthly Business Review</h1>
+            <p class="subtitle">Select a month to review shift performance metrics</p>
+        </header>
+
+        <main>
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb" id="breadcrumb" style="display: none;">
+                <a href="#" id="breadcrumbHome" onclick="backToHome(); return false;">🏠 Home</a>
+                <span class="separator" id="breadcrumbSep1" style="display: none;">→</span>
+                <a href="#" id="breadcrumbMonth" onclick="backToShifts(); return false;" style="display: none;"></a>
+                <span class="separator" id="breadcrumbSep2" style="display: none;">→</span>
+                <span class="current" id="breadcrumbCurrent" style="display: none;"></span>
+            </nav>
+            
+            <!-- Month Selection Grid -->
+            <section class="month-grid" id="monthGrid">
+                <div class="month-card" data-month="February">
+                    <div class="month-icon">📅</div>
+                    <h3>February</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="March">
+                    <div class="month-icon">📅</div>
+                    <h3>March</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="April">
+                    <div class="month-icon">📅</div>
+                    <h3>April</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="May">
+                    <div class="month-icon">📅</div>
+                    <h3>May</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="June">
+                    <div class="month-icon">📅</div>
+                    <h3>June</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="July">
+                    <div class="month-icon">📅</div>
+                    <h3>July</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="August">
+                    <div class="month-icon">📅</div>
+                    <h3>August</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="September">
+                    <div class="month-icon">📅</div>
+                    <h3>September</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="October">
+                    <div class="month-icon">📅</div>
+                    <h3>October</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="November">
+                    <div class="month-icon">📅</div>
+                    <h3>November</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="December">
+                    <div class="month-icon">📅</div>
+                    <h3>December</h3>
+                    <p class="month-year">2025</p>
+                </div>
+                <div class="month-card" data-month="January">
+                    <div class="month-icon">📅</div>
+                    <h3>January</h3>
+                    <p class="month-year">2026</p>
+                </div>
+            </section>
+
+            <!-- Shift Selection Grid (shown after selecting month) -->
+            <section class="shift-section" id="shiftSection" style="display: none;">
+                <div class="detail-header">
+                    <button class="back-button" id="backToMonthsButton">← Back to Months</button>
+                    <h2 id="selectedMonthTitle">Select Shift</h2>
+                    <button class="compare-button" id="compareButton" style="display: none;">🔍 Compare Shifts</button>
+                </div>
+                <div class="comparison-toolbar" id="comparisonToolbar" style="display: none;">
+                    <p>✅ Select 2-3 shifts to compare</p>
+                    <button class="primary-button" id="startCompareButton" disabled>Compare Selected (<span id="selectedCount">0</span>)</button>
+                    <button class="secondary-button" id="cancelCompareButton">Cancel</button>
+                </div>
+                <!-- Overview Card (special card to show all-shifts summary) -->
+                <div class="shift-grid" style="margin-bottom: 20px;">
+                    <div class="shift-card overview-card" id="overviewCard" style="grid-column: 1 / -1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="shift-icon">📊</div>
+                        <h3>Month Overview</h3>
+                        <p class="shift-time">All Shifts Summary</p>
+                    </div>
+                </div>
+                <h3 style="margin: 20px 0 10px 0; color: #666;">Individual Shifts:</h3>
+                <div class="shift-grid" id="shiftGrid">
+                <div class="shift-card" data-shift="dry-1st">
+                    <div class="shift-icon">📦</div>
+                    <h3>Dry 1st</h3>
+                    <p class="shift-time">First Shift</p>
+                </div>
+                <div class="shift-card" data-shift="dry-2nd">
+                    <div class="shift-icon">📦</div>
+                    <h3>Dry 2nd</h3>
+                    <p class="shift-time">Second Shift</p>
+                </div>
+                <div class="shift-card" data-shift="dry-4th">
+                    <div class="shift-icon">📦</div>
+                    <h3>Dry 4th</h3>
+                    <p class="shift-time">Fourth Shift</p>
+                </div>
+                <div class="shift-card" data-shift="dry-5th">
+                    <div class="shift-icon">📦</div>
+                    <h3>Dry 5th</h3>
+                    <p class="shift-time">Fifth Shift</p>
+                </div>
+                <div class="shift-card" data-shift="per-1st">
+                    <div class="shift-icon">🥬</div>
+                    <h3>Per 1st</h3>
+                    <p class="shift-time">First Shift</p>
+                </div>
+                <div class="shift-card" data-shift="per-2nd">
+                    <div class="shift-icon">🥬</div>
+                    <h3>Per 2nd</h3>
+                    <p class="shift-time">Second Shift</p>
+                </div>
+                <div class="shift-card" data-shift="per-4th">
+                    <div class="shift-icon">🥬</div>
+                    <h3>Per 4th</h3>
+                    <p class="shift-time">Fourth Shift</p>
+                </div>
+                <div class="shift-card" data-shift="per-5th">
+                    <div class="shift-icon">🥬</div>
+                    <h3>Per 5th</h3>
+                    <p class="shift-time">Fifth Shift</p>
+                </div>
+                </div>
+            </section>
+
+            <!-- Comparison View -->
+            <section class="comparison-section" id="comparisonSection" style="display: none;">
+                <div class="detail-header">
+                    <button class="back-button" id="backFromComparisonButton">← Back to Shifts</button>
+                    <h2 id="comparisonTitle">Shift Comparison</h2>
+                </div>
+
+                <div class="comparison-container" id="comparisonContainer">
+                    <!-- Dynamic comparison content will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Overview View (All Shifts Summary) -->
+            <section class="overview-section" id="overviewSection" style="display: none;">
+                <div class="detail-header">
+                    <button class="back-button" id="backFromOverviewButton">← Back to Shifts</button>
+                    <h2 id="overviewMonthTitle">Month Overview</h2>
+                </div>
+
+                <div class="overview-container" id="overviewContainer">
+                    <!-- Dynamic overview content will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Metrics Detail View -->
+            <section class="metrics-detail" id="metricsDetail" style="display: none;">
+                <div class="detail-header">
+                    <button class="back-button" id="backButton">← Back to Shifts</button>
+                    <h2 id="selectedShiftTitle">Shift Metrics</h2>
+                </div>
+
+                <div class="metrics-container" id="metricsContainer">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>🐶 Built with Code Puppy | Last updated: <span id="lastUpdated"></span></p>
+        </footer>
+    </div>
+
+    <!-- Trend Chart Modal -->
+    <div id="trendModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="trendModalTitle">Weekly Trend</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add error handler
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.message, 'at', e.filename, ':', e.lineno);
+        });
+    </script>
+    <script src="data.js"></script>
+    <script>
+        console.log('After data.js - shiftMetrics defined:', typeof shiftMetrics !== 'undefined');
+        if (typeof shiftMetrics !== 'undefined') {
+            console.log('Shifts loaded:', Object.keys(shiftMetrics));
+        }
+    </script>
+    <script src="app-v2.js"></script>
+</body>
+</html>
