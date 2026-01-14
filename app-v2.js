@@ -2445,6 +2445,18 @@ function showComparisonView(month, shiftIds) {
     
     // Animate stats
     setTimeout(animateStatCards, 100);
+    
+    // Add click listeners to metric rows
+    setTimeout(() => {
+        const metricRows = document.querySelectorAll('.metric-comparison-row');
+        metricRows.forEach(row => {
+            row.addEventListener('click', () => {
+                const metricName = row.getAttribute('data-metric-name');
+                const goal = row.getAttribute('data-metric-goal');
+                showComparisonChart(metricName, goal);
+            });
+        });
+    }, 200);
 }
 
 function generateComparisonHTML(month, shiftIds) {
@@ -2667,9 +2679,12 @@ function generateMetricComparisonRow(metricName, shiftsData) {
     `).join('');
     
     return `
-        <div class="metric-comparison-row">
+        <div class="metric-comparison-row" data-metric-name="${metricName}" data-metric-goal="${goal}" style="cursor: pointer;" title="Click to view chart">
             <div class="metric-comparison-row-header">
-                <div class="metric-name">${metricName}</div>
+                <div class="metric-name">
+                    ${metricName}
+                    <span style="font-size: 0.8em; color: #667eea; margin-left: 8px;">📊 Click for chart</span>
+                </div>
                 <div class="metric-goal">Goal: ${goal}</div>
             </div>
             <div class="metric-comparison-values">
@@ -2677,6 +2692,178 @@ function generateMetricComparisonRow(metricName, shiftsData) {
             </div>
         </div>
     `;
+}
+
+function showComparisonChart(metricName, goal) {
+    // Destroy existing chart if any
+    if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+    }
+    
+    // Show modal
+    const modal = document.getElementById('trendModal');
+    const modalTitle = document.getElementById('trendModalTitle');
+    
+    modalTitle.textContent = `📈 ${metricName} Trend Comparison`;
+    modal.style.display = 'flex';
+    
+    // Get the shift IDs from the comparison
+    const shiftIds = selectedShiftsForComparison;
+    
+    // Fiscal year months
+    const fiscalMonths = ['February', 'March', 'April', 'May', 'June', 'July',
+                         'August', 'September', 'October', 'November', 'December', 'January'];
+    
+    // Colors for each shift line
+    const shiftColors = [
+        { border: 'rgba(102, 126, 234, 1)', bg: 'rgba(102, 126, 234, 0.1)' },  // Purple
+        { border: 'rgba(255, 99, 132, 1)', bg: 'rgba(255, 99, 132, 0.1)' },    // Red
+        { border: 'rgba(75, 192, 192, 1)', bg: 'rgba(75, 192, 192, 0.1)' },    // Teal
+        { border: 'rgba(255, 159, 64, 1)', bg: 'rgba(255, 159, 64, 0.1)' }     // Orange
+    ];
+    
+    // Build datasets - one line per shift
+    const datasets = shiftIds.map((shiftId, index) => {
+        const shift = shiftMetrics[shiftId];
+        const color = shiftColors[index % shiftColors.length];
+        
+        // Find the metric data across all months
+        const monthlyValues = [];
+        
+        // Search through categories to find this metric
+        if (shift && shift.categories) {
+            let metricFound = false;
+            
+            Object.keys(shift.categories).forEach(category => {
+                Object.keys(shift.categories[category]).forEach(subcategory => {
+                    if (subcategory === metricName) {
+                        const metrics = shift.categories[category][subcategory];
+                        
+                        // Get values in fiscal year order
+                        fiscalMonths.forEach(month => {
+                            const monthMetric = metrics.find(m => m.month === month);
+                            if (monthMetric) {
+                                // Extract numeric value
+                                const numValue = parseFloat(
+                                    (monthMetric.value || '0').toString().replace(/[^0-9.-]/g, '')
+                                ) || 0;
+                                monthlyValues.push(numValue);
+                            } else {
+                                monthlyValues.push(null);
+                            }
+                        });
+                        
+                        metricFound = true;
+                    }
+                });
+            });
+        }
+        
+        return {
+            label: shift?.name || shiftId,
+            data: monthlyValues,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 3,
+            tension: 0.3,
+            fill: false,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: color.border,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        };
+    });
+    
+    // Create chart
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: fiscalMonths,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `${metricName} - Goal: ${goal}`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    padding: {
+                        bottom: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return `${context.dataset.label}: ${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: metricName,
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Fiscal Year 2025',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
 }
 
 function backFromComparison() {
