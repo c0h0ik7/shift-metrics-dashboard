@@ -145,6 +145,223 @@ function initDarkMode() {
     });
 }
 
+// ========================================
+// BUILDING YTD SUMMARY
+// ========================================
+
+function calculateBuildingYTD() {
+    const metricGoals = {
+        'DPM': { value: 1500, direction: 'lower', format: 'number' },
+        'Medical Incidents': { value: 0, direction: 'lower', format: 'number' },
+        'Non-Medical Incidents': { value: 0, direction: 'lower', format: 'number' },
+        'Chase %': { value: 3, direction: 'lower', format: 'percent' },
+        'Overtime': { value: 0, direction: 'lower', format: 'number' },
+        'Turnover %': { value: 10, direction: 'lower', format: 'percent' },
+        'Receiving CPH': { value: 1100, direction: 'higher', format: 'number' },
+        'Shipping CPH': { value: 230, direction: 'higher', format: 'number' },
+        'Fill Rate %': { value: 95, direction: 'higher', format: 'percent' }
+    };
+
+    const fiscalMonths = ['February', 'March', 'April', 'May', 'June', 'July',
+                         'August', 'September', 'October', 'November', 'December', 'January'];
+    
+    const metrics = {};
+    
+    // Initialize metrics tracking
+    Object.keys(metricGoals).forEach(metricName => {
+        metrics[metricName] = {
+            totalValue: 0,
+            count: 0,
+            monthsMet: 0,
+            totalMonths: 0
+        };
+    });
+    
+    // Iterate through all shifts
+    Object.keys(shiftMetrics).forEach(shiftId => {
+        const shift = shiftMetrics[shiftId];
+        
+        // Iterate through categories
+        Object.keys(shift.categories).forEach(categoryName => {
+            const category = shift.categories[categoryName];
+            
+            // Iterate through metrics in this category
+            Object.keys(category).forEach(metricName => {
+                if (metrics[metricName]) {
+                    const metricData = category[metricName];
+                    
+                    // Calculate YTD for this metric across all months
+                    metricData.forEach(monthData => {
+                        const rawValue = monthData.value;
+                        const numericValue = parseFloat(rawValue.toString().replace(/[^0-9.-]/g, ''));
+                        
+                        if (!isNaN(numericValue)) {
+                            metrics[metricName].totalValue += numericValue;
+                            metrics[metricName].count++;
+                            
+                            // Track if this month met the goal
+                            if (monthData.status === 'green') {
+                                metrics[metricName].monthsMet++;
+                            }
+                            metrics[metricName].totalMonths++;
+                        }
+                    });
+                }
+            });
+        });
+    });
+    
+    // Calculate averages and goal achievement
+    const results = {};
+    Object.keys(metrics).forEach(metricName => {
+        const metric = metrics[metricName];
+        const goalInfo = metricGoals[metricName];
+        
+        if (metric.count > 0) {
+            const average = metric.totalValue / metric.count;
+            const percentMet = metric.totalMonths > 0 ? 
+                Math.round((metric.monthsMet / metric.totalMonths) * 100) : 0;
+            
+            // Determine if building average meets goal
+            let meetsGoal = false;
+            if (goalInfo.direction === 'lower') {
+                meetsGoal = average <= goalInfo.value;
+            } else {
+                meetsGoal = average >= goalInfo.value;
+            }
+            
+            results[metricName] = {
+                average: average,
+                percentMet: percentMet,
+                meetsGoal: meetsGoal,
+                goal: goalInfo,
+                monthsMet: metric.monthsMet,
+                totalMonths: metric.totalMonths
+            };
+        }
+    });
+    
+    return results;
+}
+
+function renderBuildingYTD() {
+    const container = document.getElementById('buildingYtdContainer');
+    if (!container) return;
+    
+    const ytdData = calculateBuildingYTD();
+    
+    // Group metrics by category
+    const categories = {
+        'Quality': ['DPM', 'Chase %'],
+        'Safety': ['Medical Incidents', 'Non-Medical Incidents'],
+        'Performance': ['Receiving CPH', 'Shipping CPH', 'Fill Rate %'],
+        'Workforce': ['Overtime', 'Turnover %']
+    };
+    
+    let html = '<div class="ytd-categories-grid">';
+    
+    Object.keys(categories).forEach(categoryName => {
+        const categoryMetrics = categories[categoryName];
+        
+        html += `
+            <div class="ytd-category-card">
+                <div class="ytd-category-header">
+                    <h3>${getCategoryIcon(categoryName)} ${categoryName}</h3>
+                </div>
+                <div class="ytd-metrics-list">
+        `;
+        
+        categoryMetrics.forEach(metricName => {
+            const data = ytdData[metricName];
+            if (!data) return;
+            
+            const statusClass = data.meetsGoal ? 'success' : 'alert';
+            const statusIcon = data.meetsGoal ? '✅' : '❌';
+            
+            // Format the average value
+            let formattedValue;
+            if (data.goal.format === 'percent') {
+                formattedValue = data.average.toFixed(2) + '%';
+            } else {
+                formattedValue = Math.round(data.average).toLocaleString();
+            }
+            
+            // Format the goal
+            let formattedGoal;
+            if (data.goal.direction === 'lower') {
+                formattedGoal = `< ${data.goal.value}${data.goal.format === 'percent' ? '%' : ''}`;
+            } else {
+                formattedGoal = `> ${data.goal.value}${data.goal.format === 'percent' ? '%' : ''}`;
+            }
+            
+            html += `
+                <div class="ytd-metric-row ${statusClass}">
+                    <div class="ytd-metric-info">
+                        <div class="ytd-metric-name">${metricName}</div>
+                        <div class="ytd-metric-goal">Goal: ${formattedGoal}</div>
+                    </div>
+                    <div class="ytd-metric-values">
+                        <div class="ytd-metric-average">
+                            <span class="ytd-label">Avg:</span>
+                            <span class="ytd-value">${formattedValue}</span>
+                            <span class="ytd-status">${statusIcon}</span>
+                        </div>
+                        <div class="ytd-metric-achievement">
+                            <div class="ytd-progress-bar">
+                                <div class="ytd-progress-fill ${statusClass}" style="width: ${data.percentMet}%"></div>
+                            </div>
+                            <span class="ytd-percent">${data.percentMet}% of months met goal</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    // Animate the YTD values
+    setTimeout(() => {
+        document.querySelectorAll('.ytd-value').forEach(element => {
+            const text = element.textContent.trim();
+            const match = text.match(/([\d,]+\.?\d*)/); 
+            
+            if (match) {
+                const value = parseFloat(match[1].replace(/,/g, ''));
+                const isPercent = text.includes('%');
+                element.textContent = '0';
+                animateValue(element, 0, value, 1200);
+                
+                // Re-add percent sign after animation
+                if (isPercent) {
+                    setTimeout(() => {
+                        if (!element.textContent.includes('%')) {
+                            element.textContent += '%';
+                        }
+                    }, 1300);
+                }
+            }
+        });
+    }, 200);
+}
+
+function getCategoryIcon(categoryName) {
+    const icons = {
+        'Quality': '⭐',
+        'Safety': '🛡️',
+        'Performance': '📊',
+        'Workforce': '👥'
+    };
+    return icons[categoryName] || '📈';
+}
+
 // Initialize the application
 function init() {
     initDarkMode();
@@ -156,8 +373,72 @@ function init() {
     setupMonthListeners();
     setupShiftListeners();
     setupComparisonListeners();
+    setupYtdListeners();
     updateLastUpdatedTime();
     console.log('Dashboard initialized!');
+}
+
+// Set up YTD listeners
+function setupYtdListeners() {
+    const ytdCard = document.getElementById('ytdCard');
+    const backFromYtdButton = document.getElementById('backFromYtdButton');
+    
+    if (ytdCard) {
+        ytdCard.addEventListener('click', showBuildingYTD);
+        
+        // Add keyboard accessibility
+        ytdCard.setAttribute('tabindex', '0');
+        ytdCard.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showBuildingYTD();
+            }
+        });
+    }
+    
+    if (backFromYtdButton) {
+        backFromYtdButton.addEventListener('click', backToHome);
+    }
+}
+
+function showBuildingYTD() {
+    console.log('Showing Building YTD Summary');
+    
+    // Hide month grid
+    document.getElementById('monthGrid').style.display = 'none';
+    
+    // Show YTD section
+    document.getElementById('buildingYtdSection').style.display = 'block';
+    
+    // Render YTD data if not already rendered
+    renderBuildingYTD();
+    
+    // Update breadcrumb
+    updateBreadcrumb('ytd');
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToHome() {
+    console.log('Back to home');
+    
+    // Hide all detail sections
+    document.getElementById('buildingYtdSection').style.display = 'none';
+    document.getElementById('shiftSection').style.display = 'none';
+    document.getElementById('metricsDetail').style.display = 'none';
+    document.getElementById('overviewSection').style.display = 'none';
+    document.getElementById('comparisonSection').style.display = 'none';
+    
+    // Show month grid
+    document.getElementById('monthGrid').style.display = 'grid';
+    
+    // Reset state
+    currentMonth = null;
+    currentShift = null;
+    
+    // Update breadcrumb
+    updateBreadcrumb('home');
 }
 
 // Set up comparison mode event listeners
@@ -302,6 +583,13 @@ function updateBreadcrumb(level, monthName = null, viewName = null) {
     
     if (level === 'home') {
         breadcrumb.style.display = 'none';
+    } else if (level === 'ytd') {
+        breadcrumb.style.display = 'flex';
+        breadcrumbMonth.style.display = 'none';
+        breadcrumbCurrent.style.display = 'inline';
+        breadcrumbCurrent.textContent = '🏢 YTD Summary';
+        sep1.style.display = 'inline';
+        sep2.style.display = 'none';
     } else if (level === 'month') {
         breadcrumb.style.display = 'flex';
         breadcrumbMonth.style.display = 'none';
@@ -2610,302 +2898,4 @@ function generateWinnerSection(shiftsData, allMetrics) {
 
 function generateMetricComparisons(shiftsData, allMetrics) {
     const metricCategories = {
-        '📊 Quality': ['DPM', 'Chase %'],
-        '🛡️ Safety': ['Medical Incidents', 'Non-Medical Incidents'],
-        '💰 Cost': ['Overtime', 'Turnover %', 'Receiving CPH', 'Shipping CPH'],
-        '📈 Trending': ['Fill Rate %']
-    };
-    
-    let html = '';
-    
-    Object.entries(metricCategories).forEach(([categoryName, metrics]) => {
-        const categoryMetrics = metrics.filter(m => allMetrics.includes(m));
-        if (categoryMetrics.length === 0) return;
-        
-        html += `<div class="metric-category" style="margin-top: 30px;">`;
-        html += `<h3 style="color: #667eea; font-size: 1.2em; margin-bottom: 15px;">${categoryName}</h3>`;
-        
-        categoryMetrics.forEach(metricName => {
-            html += generateMetricComparisonRow(metricName, shiftsData);
-        });
-        
-        html += `</div>`;
-    });
-    
-    return html;
-}
-
-function generateMetricComparisonRow(metricName, shiftsData) {
-    const metricGoals = {
-        'DPM': '< 1,500',
-        'Medical Incidents': '= 0',
-        'Non-Medical Incidents': '= 0',
-        'Chase %': '< 3%',
-        'Overtime': '= 0',
-        'Turnover %': '< 10%',
-        'Receiving CPH': '> 1,100',
-        'Shipping CPH': '> 230',
-        'Fill Rate %': '> 95%'
-    };
-    
-    const goal = metricGoals[metricName] || '';
-    
-    // Get values for each shift
-    const values = shiftsData.map(shift => {
-        const metric = shift.data[metricName];
-        return {
-            name: shift.name,
-            value: metric?.value || 'N/A',
-            status: metric?.status || 'neutral',
-            numericValue: parseFloat((metric?.value || '0').toString().replace(/[^0-9.-]/g, '')) || 0
-        };
-    });
-    
-    // Determine winner (most green, or best numeric value if all same status)
-    let winner = null;
-    const greenShifts = values.filter(v => v.status === 'green');
-    if (greenShifts.length > 0 && greenShifts.length < values.length) {
-        winner = greenShifts[0].name;
-    }
-    
-    const valuesHTML = values.map(v => `
-        <div class="shift-metric-value ${v.name === winner ? 'winner' : v.status === 'red' ? 'loser' : ''}">
-            <div class="shift-metric-label">${v.name}</div>
-            <div class="shift-metric-number">${v.value}</div>
-            ${v.status === 'green' ? '<span class="shift-metric-badge goal-met">✅ Goal Met</span>' : ''}
-            ${v.status === 'red' ? '<span class="shift-metric-badge goal-missed">❌ Missed</span>' : ''}
-            ${v.name === winner ? '<span class="shift-metric-badge winner-badge">🏆 Winner</span>' : ''}
-        </div>
-    `).join('');
-    
-    return `
-        <div class="metric-comparison-row" data-metric-name="${metricName}" data-metric-goal="${goal}" style="cursor: pointer;" title="Click to view chart">
-            <div class="metric-comparison-row-header">
-                <div class="metric-name">
-                    ${metricName}
-                    <span style="font-size: 0.8em; color: #667eea; margin-left: 8px;">📊 Click for chart</span>
-                </div>
-                <div class="metric-goal">Goal: ${goal}</div>
-            </div>
-            <div class="metric-comparison-values">
-                ${valuesHTML}
-            </div>
-        </div>
-    `;
-}
-
-function showComparisonChart(metricName, goal) {
-    // Destroy existing chart if any
-    if (currentChart) {
-        currentChart.destroy();
-        currentChart = null;
-    }
-    
-    // Show modal
-    const modal = document.getElementById('trendModal');
-    const modalTitle = document.getElementById('trendModalTitle');
-    
-    modalTitle.textContent = `📈 ${metricName} Trend Comparison`;
-    modal.style.display = 'flex';
-    
-    // Get the shift IDs from the comparison
-    const shiftIds = selectedShiftsForComparison;
-    
-    // Fiscal year months
-    const fiscalMonths = ['February', 'March', 'April', 'May', 'June', 'July',
-                         'August', 'September', 'October', 'November', 'December', 'January'];
-    
-    // Colors for each shift line
-    const shiftColors = [
-        { border: 'rgba(102, 126, 234, 1)', bg: 'rgba(102, 126, 234, 0.1)' },  // Purple
-        { border: 'rgba(255, 99, 132, 1)', bg: 'rgba(255, 99, 132, 0.1)' },    // Red
-        { border: 'rgba(75, 192, 192, 1)', bg: 'rgba(75, 192, 192, 0.1)' },    // Teal
-        { border: 'rgba(255, 159, 64, 1)', bg: 'rgba(255, 159, 64, 0.1)' }     // Orange
-    ];
-    
-    // Build datasets - one line per shift
-    const datasets = shiftIds.map((shiftId, index) => {
-        const shift = shiftMetrics[shiftId];
-        const color = shiftColors[index % shiftColors.length];
-        
-        // Find the metric data across all months
-        const monthlyValues = [];
-        
-        // Search through categories to find this metric
-        if (shift && shift.categories) {
-            let metricFound = false;
-            
-            Object.keys(shift.categories).forEach(category => {
-                Object.keys(shift.categories[category]).forEach(subcategory => {
-                    if (subcategory === metricName) {
-                        const metrics = shift.categories[category][subcategory];
-                        
-                        // Get values in fiscal year order
-                        fiscalMonths.forEach(month => {
-                            const monthMetric = metrics.find(m => m.month === month);
-                            if (monthMetric) {
-                                // Extract numeric value
-                                const numValue = parseFloat(
-                                    (monthMetric.value || '0').toString().replace(/[^0-9.-]/g, '')
-                                ) || 0;
-                                monthlyValues.push(numValue);
-                            } else {
-                                monthlyValues.push(null);
-                            }
-                        });
-                        
-                        metricFound = true;
-                    }
-                });
-            });
-        }
-        
-        return {
-            label: shift?.name || shiftId,
-            data: monthlyValues,
-            borderColor: color.border,
-            backgroundColor: color.bg,
-            borderWidth: 3,
-            tension: 0.3,
-            fill: false,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBackgroundColor: color.border,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-        };
-    });
-    
-    // Create chart
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    
-    currentChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: fiscalMonths,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: `${metricName} - Goal: ${goal}`,
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    },
-                    padding: {
-                        bottom: 20
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: {
-                        size: 14
-                    },
-                    bodyFont: {
-                        size: 13
-                    },
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed.y;
-                            return `${context.dataset.label}: ${value.toLocaleString()}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: metricName,
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Fiscal Year 2025',
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                }
-            }
-        }
-    });
-}
-
-function backFromComparison() {
-    document.getElementById('comparisonSection').style.display = 'none';
-    document.getElementById('shiftSection').style.display = 'block';
-    
-    // Reset comparison mode
-    disableComparisonMode();
-    
-    // Update breadcrumb
-    updateBreadcrumb('month', currentMonth);
-}
-
-// Initialize on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
-
-// Set up modal close handlers
-document.addEventListener('DOMContentLoaded', () => {
-    const closeButton = document.getElementById('closeModal');
-    const modal = document.getElementById('trendModal');
-    
-    if (closeButton) {
-        closeButton.addEventListener('click', closeModal);
-    }
-    
-    // Close on outside click
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    }
-    
-    // Close on ESC key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.style.display === 'flex') {
-            closeModal();
-        }
-    });
-});
+        '📊 Quality': ['
