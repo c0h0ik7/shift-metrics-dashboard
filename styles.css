@@ -286,6 +286,218 @@ body.dark-mode .breadcrumb .current {
     background: rgba(96, 165, 250, 0.2);
 }
 
+/* Building YTD Summary Section */
+.building-ytd-section {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.building-ytd-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.ytd-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.ytd-category-card {
+    background: var(--stat-card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.ytd-category-card:hover {
+    box-shadow: 0 4px 16px var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.ytd-category-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.ytd-category-header h3 {
+    font-size: 1.3em;
+    color: var(--text-header);
+    font-weight: 600;
+}
+
+.ytd-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ytd-metric-row {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.ytd-metric-row.success {
+    border-left-color: var(--success-border);
+    background: var(--success-bg);
+}
+
+.ytd-metric-row.alert {
+    border-left-color: var(--alert-border);
+    background: var(--alert-bg);
+}
+
+.ytd-metric-row:hover {
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transform: translateX(4px);
+}
+
+.ytd-metric-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ytd-metric-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ytd-metric-goal {
+    font-size: 0.9em;
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.ytd-metric-values {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ytd-metric-average {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+}
+
+.ytd-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.ytd-value {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--walmart-blue);
+}
+
+.ytd-metric-row.success .ytd-value {
+    color: var(--success-color);
+}
+
+.ytd-metric-row.alert .ytd-value {
+    color: var(--alert-color);
+}
+
+.ytd-status {
+    font-size: 1.2em;
+}
+
+.ytd-metric-achievement {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ytd-progress-bar {
+    flex: 1;
+    height: 20px;
+    background: var(--bg-card-hover);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.ytd-progress-fill {
+    height: 100%;
+    transition: width 1.5s ease-out;
+    border-radius: 10px;
+}
+
+.ytd-progress-fill.success {
+    background: linear-gradient(90deg, var(--success-border) 0%, #48bb78 100%);
+}
+
+.ytd-progress-fill.alert {
+    background: linear-gradient(90deg, var(--alert-border) 0%, #f56565 100%);
+}
+
+.ytd-percent {
+    font-size: 0.85em;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+/* Dark Mode Overrides for YTD */
+body.dark-mode .ytd-metric-row.success {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+body.dark-mode .ytd-metric-row.alert {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+body.dark-mode .ytd-metric-row.success .ytd-value {
+    color: #10b981;
+}
+
+body.dark-mode .ytd-metric-row.alert .ytd-value {
+    color: #ef4444;
+}
+
+/* Responsive Design for YTD */
+@media (max-width: 900px) {
+    .ytd-categories-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .building-ytd-section {
+        padding: 20px 15px;
+    }
+    
+    .building-ytd-header h2 {
+        font-size: 1.5em;
+    }
+    
+    .ytd-metric-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .ytd-metric-achievement {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .ytd-percent {
+        text-align: center;
+        min-width: auto;
+    }
+}
+
 /* Month Grid */
 .month-grid {
     display: grid;
@@ -295,8 +507,6 @@ body.dark-mode .breadcrumb .current {
 }
 
 .month-card {
-    background: linear-gradient(135deg, rgba(255, 194, 32, 0.80) 0%, rgba(255, 184, 0, 0.80) 100%), 
-                url('walmart-logo-watermark.png');
     background-size: auto, 100px 100px;
     background-position: center, center;
     background-repeat: no-repeat, no-repeat;
@@ -309,6 +519,117 @@ body.dark-mode .breadcrumb .current {
     box-shadow: 0 4px 12px rgba(0, 113, 206, 0.2);
     position: relative;
 }
+
+/* Individual Month Colors - Vibrant Palette */
+.month-card:nth-child(1) { /* YTD - Purple (already styled) */ }
+
+.month-card:nth-child(2) { /* February */
+    background: linear-gradient(135deg, rgb(236, 72, 153) 0%, rgb(219, 39, 119) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #db2777;
+}
+.month-card:nth-child(2) h3 { color: #1f2937 !important; }
+.month-card:nth-child(2) .month-year { color: #374151 !important; }
+.month-card:nth-child(2) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(3) { /* March */
+    background: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(22, 163, 74) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #16a34a;
+}
+.month-card:nth-child(3) h3 { color: #1f2937 !important; }
+.month-card:nth-child(3) .month-year { color: #374151 !important; }
+.month-card:nth-child(3) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(4) { /* April */
+    background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #2563eb;
+}
+.month-card:nth-child(4) h3 { color: #1f2937 !important; }
+.month-card:nth-child(4) .month-year { color: #374151 !important; }
+.month-card:nth-child(4) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(5) { /* May */
+    background: linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(147, 51, 234) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #9333ea;
+}
+.month-card:nth-child(5) h3 { color: #1f2937 !important; }
+.month-card:nth-child(5) .month-year { color: #374151 !important; }
+.month-card:nth-child(5) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(6) { /* June */
+    background: linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(249, 115, 22) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #f97316;
+}
+.month-card:nth-child(6) h3 { color: #1f2937 !important; }
+.month-card:nth-child(6) .month-year { color: #374151 !important; }
+.month-card:nth-child(6) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(7) { /* July */
+    background: linear-gradient(135deg, rgb(239, 68, 68) 0%, rgb(220, 38, 38) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #dc2626;
+}
+.month-card:nth-child(7) h3 { color: #1f2937 !important; }
+.month-card:nth-child(7) .month-year { color: #374151 !important; }
+.month-card:nth-child(7) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(8) { /* August */
+    background: linear-gradient(135deg, rgb(234, 179, 8) 0%, rgb(202, 138, 4) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #ca8a04;
+}
+.month-card:nth-child(8) h3 { color: #1f2937 !important; }
+.month-card:nth-child(8) .month-year { color: #374151 !important; }
+.month-card:nth-child(8) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(9) { /* September */
+    background: linear-gradient(135deg, rgb(20, 184, 166) 0%, rgb(13, 148, 136) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #0d9488;
+}
+.month-card:nth-child(9) h3 { color: #1f2937 !important; }
+.month-card:nth-child(9) .month-year { color: #374151 !important; }
+.month-card:nth-child(9) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(10) { /* October */
+    background: linear-gradient(135deg, rgb(249, 115, 22) 0%, rgb(234, 88, 12) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #ea580c;
+}
+.month-card:nth-child(10) h3 { color: #1f2937 !important; }
+.month-card:nth-child(10) .month-year { color: #374151 !important; }
+.month-card:nth-child(10) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(11) { /* November */
+    background: linear-gradient(135deg, rgb(139, 92, 246) 0%, rgb(124, 58, 237) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #7c3aed;
+}
+.month-card:nth-child(11) h3 { color: #1f2937 !important; }
+.month-card:nth-child(11) .month-year { color: #374151 !important; }
+.month-card:nth-child(11) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(12) { /* December */
+    background: linear-gradient(135deg, rgb(225, 29, 72) 0%, rgb(190, 18, 60) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #be123c;
+}
+.month-card:nth-child(12) h3 { color: #1f2937 !important; }
+.month-card:nth-child(12) .month-year { color: #374151 !important; }
+.month-card:nth-child(12) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.month-card:nth-child(13) { /* January */
+    background: linear-gradient(135deg, rgb(14, 165, 233) 0%, rgb(2, 132, 199) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #0284c7;
+}
+.month-card:nth-child(13) h3 { color: #1f2937 !important; }
+.month-card:nth-child(13) .month-year { color: #374151 !important; }
+.month-card:nth-child(13) .month-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 
 .month-card:hover {
     transform: translateY(-8px) scale(1.05);
@@ -338,6 +659,110 @@ body.dark-mode .breadcrumb .current {
     font-weight: 600;
 }
 
+/* YTD Summary Card - Special Styling */
+.ytd-card {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%), 
+                url('walmart-logo-watermark.png');
+    background-size: auto, 100px 100px;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    border: 3px solid #667eea;
+    grid-column: 1 / -1; /* Span full width */
+    max-width: 400px;
+    margin: 0 auto 20px auto;
+}
+
+.ytd-card h3 {
+    color: #1f2937 !important;
+}
+
+.ytd-card .month-year {
+    color: #374151 !important;
+}
+
+.ytd-card .month-icon {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.ytd-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+    border-color: #764ba2;
+}
+
+/* Dark Mode - Month and Shift Cards */
+body.dark-mode .ytd-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%), 
+                url('walmart-logo-watermark.png');
+    background-size: auto, 100px 100px;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    border-color: #667eea;
+}
+
+/* Dark mode - Yellow text for YTD card */
+body.dark-mode .ytd-card h3 {
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .ytd-card .month-year {
+    color: #fcd34d !important;
+}
+
+/* Dark mode - Yellow text for all month cards */
+body.dark-mode .month-card:nth-child(2) h3,
+body.dark-mode .month-card:nth-child(3) h3,
+body.dark-mode .month-card:nth-child(4) h3,
+body.dark-mode .month-card:nth-child(5) h3,
+body.dark-mode .month-card:nth-child(6) h3,
+body.dark-mode .month-card:nth-child(7) h3,
+body.dark-mode .month-card:nth-child(8) h3,
+body.dark-mode .month-card:nth-child(9) h3,
+body.dark-mode .month-card:nth-child(10) h3,
+body.dark-mode .month-card:nth-child(11) h3,
+body.dark-mode .month-card:nth-child(12) h3,
+body.dark-mode .month-card:nth-child(13) h3 {
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .month-card:nth-child(2) .month-year,
+body.dark-mode .month-card:nth-child(3) .month-year,
+body.dark-mode .month-card:nth-child(4) .month-year,
+body.dark-mode .month-card:nth-child(5) .month-year,
+body.dark-mode .month-card:nth-child(6) .month-year,
+body.dark-mode .month-card:nth-child(7) .month-year,
+body.dark-mode .month-card:nth-child(8) .month-year,
+body.dark-mode .month-card:nth-child(9) .month-year,
+body.dark-mode .month-card:nth-child(10) .month-year,
+body.dark-mode .month-card:nth-child(11) .month-year,
+body.dark-mode .month-card:nth-child(12) .month-year,
+body.dark-mode .month-card:nth-child(13) .month-year {
+    color: #fcd34d !important;
+}
+
+/* Dark mode - Yellow text for all shift cards */
+body.dark-mode .shift-card[data-shift="dry-1st"] h3,
+body.dark-mode .shift-card[data-shift="dry-2nd"] h3,
+body.dark-mode .shift-card[data-shift="dry-4th"] h3,
+body.dark-mode .shift-card[data-shift="dry-5th"] h3,
+body.dark-mode .shift-card[data-shift="per-1st"] h3,
+body.dark-mode .shift-card[data-shift="per-2nd"] h3,
+body.dark-mode .shift-card[data-shift="per-4th"] h3,
+body.dark-mode .shift-card[data-shift="per-5th"] h3 {
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .shift-card[data-shift="dry-1st"] .shift-time,
+body.dark-mode .shift-card[data-shift="dry-2nd"] .shift-time,
+body.dark-mode .shift-card[data-shift="dry-4th"] .shift-time,
+body.dark-mode .shift-card[data-shift="dry-5th"] .shift-time,
+body.dark-mode .shift-card[data-shift="per-1st"] .shift-time,
+body.dark-mode .shift-card[data-shift="per-2nd"] .shift-time,
+body.dark-mode .shift-card[data-shift="per-4th"] .shift-time,
+body.dark-mode .shift-card[data-shift="per-5th"] .shift-time {
+    color: #fcd34d !important;
+}
+
 /* Shift Grid */
 .shift-grid {
     display: grid;
@@ -347,8 +772,6 @@ body.dark-mode .breadcrumb .current {
 }
 
 .shift-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.80) 0%, rgba(248, 249, 250, 0.80) 100%), 
-                url('walmart-logo-watermark.png');
     background-size: auto, 90px 90px;
     background-position: center, center;
     background-repeat: no-repeat, no-repeat;
@@ -360,6 +783,79 @@ body.dark-mode .breadcrumb .current {
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Individual Shift Colors - Dry shifts (warm tones), Per shifts (cool tones) */
+.shift-card[data-shift="dry-1st"] {
+    background: linear-gradient(135deg, rgb(251, 191, 36) 0%, rgb(245, 158, 11) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #f59e0b;
+}
+.shift-card[data-shift="dry-1st"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="dry-1st"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="dry-1st"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="dry-2nd"] {
+    background: linear-gradient(135deg, rgb(249, 115, 22) 0%, rgb(234, 88, 12) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #ea580c;
+}
+.shift-card[data-shift="dry-2nd"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="dry-2nd"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="dry-2nd"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="dry-4th"] {
+    background: linear-gradient(135deg, rgb(239, 68, 68) 0%, rgb(220, 38, 38) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #dc2626;
+}
+.shift-card[data-shift="dry-4th"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="dry-4th"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="dry-4th"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="dry-5th"] {
+    background: linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(249, 115, 22) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #f97316;
+}
+.shift-card[data-shift="dry-5th"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="dry-5th"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="dry-5th"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="per-1st"] {
+    background: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(22, 163, 74) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #16a34a;
+}
+.shift-card[data-shift="per-1st"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="per-1st"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="per-1st"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="per-2nd"] {
+    background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #059669;
+}
+.shift-card[data-shift="per-2nd"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="per-2nd"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="per-2nd"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="per-4th"] {
+    background: linear-gradient(135deg, rgb(20, 184, 166) 0%, rgb(13, 148, 136) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #0d9488;
+}
+.shift-card[data-shift="per-4th"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="per-4th"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="per-4th"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.shift-card[data-shift="per-5th"] {
+    background: linear-gradient(135deg, rgb(6, 182, 212) 0%, rgb(8, 145, 178) 100%), 
+                url('walmart-logo-watermark.png');
+    border-color: #0891b2;
+}
+.shift-card[data-shift="per-5th"] h3 { color: #1f2937 !important; }
+.shift-card[data-shift="per-5th"] .shift-time { color: #374151 !important; }
+.shift-card[data-shift="per-5th"] .shift-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 
 .shift-card:hover {
     transform: translateY(-8px);
